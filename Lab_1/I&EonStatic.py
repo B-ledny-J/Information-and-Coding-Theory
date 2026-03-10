@@ -1,4 +1,5 @@
 import math
+import re
 from collections import Counter
 
 texts = {
@@ -70,6 +71,8 @@ text = texts[v_choice][l_choice]
 alphabet = alphabets[l_choice]
 
 print(f"Обраний текст: {text}")
+
+text = re.sub(r'\s', ' ', text)
 
 n = len(text)
 counts = Counter(text)

@@ -1,5 +1,7 @@
 import re
 import math
+from itertools import count
+
 import requests # pip install requests
 from collections import Counter
 from bs4 import BeautifulSoup # pip install beautifulsoup4
@@ -23,26 +25,13 @@ def get_text_from_url(url):
         clean_text = soup.get_text(separator=' ')
 
         # Прибираємо зайві пробіли та порожні рядки
-        lines = (line.strip() for line in clean_text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        final_text = '\n'.join(chunk for chunk in chunks if chunk)
-
-        return final_text
+        return re.sub(r'\s', ' ', clean_text)
 
     except Exception as e:
         print(f"Помилка при завантаженні тексту: {e}")
         return None
 
-url_input = input("Введіть посилання на сайт (з http/https): ")
-text = get_text_from_url(url_input)
-text = re.sub(r'\s', ' ', text)
-
-if text:
-    n = len(text)
-    counts = Counter(text)
-
-    print(f"\nТекст успішно отримано! Довжина: {n} символів.")
-
+def get_base_unit():
     print("\nОберіть тип даних (одиниць виміру):")
     print("1. Біти (основа 2)")
     print("2. Ніти (основа e)")
@@ -58,25 +47,45 @@ if text:
     else:
         base = 2
         unit = "бит"
+    return base, unit
 
+def process_statistics(text, base):
     entropy = 0
-    print("\n" + "-" * 40)
-    print(f"{'Символ':<10} | {'Кількість':<10} | {'Вірогідність':<12}")
-    print("-" * 40)
+    n = len(text)
+    counts = len(Counter(text))
+    stats_list = []
+    sorted_items = sorted(counts.items(), key=lambda item: item[1], reverse=True)
 
-    for i, (char, count) in enumerate(sorted(counts.items(), key=lambda item: item[1], reverse=True)):
+    for i, (char, count) in enumerate(sorted_items):
         p = count / n
         entropy -= p * math.log(p, base)
         if i < 10:
-            display_char = repr(char)
-            print(f"{display_char:<10} | {count:<10} | {p:<12.4f}")
+            stats_list.append((repr(char), count, p))
 
     info_amount = n * entropy
+    return n, counts, entropy, info_amount, stats_list
+
+def display_report(n, unique_count, entropy, info_amount, unit, stats_list):
+    print("\n" + "-" * 40)
+    print(f"{'Символ':<10} | {'Кількість':<10} | {'Вірогідність':<12}")
+    print("-" * 40)
+    for char, count, p in stats_list:
+        print(f"{char:<10} | {count:<10} | {p:<12.4f}")
 
     print("-" * 40)
-    print(f"Символів тексту: {n}")
-    print(f"Кількість унікальних символів: {len(counts)}")
+    print(f"Довжина тексту: {n}")
+    print(f"Унікальних символів: {unique_count}")
     print(f"Ентропія: {entropy:.4f} {unit}/символ")
     print(f"Кількість інформації: {info_amount:.4f} {unit}")
+
+url_input = input("Введіть посилання на сайт (з http/https): ")
+text = get_text_from_url(url_input)
+
+if text:
+    base, unit = get_base_unit()
+    n, counts, entropy, info_amount, top_10 = process_statistics(text, base)
+    print(f"\nТекст успішно отримано!")
+    display_report(n, count, entropy, info_amount, unit, top_10)
 else:
     print("Не вдалося обробити текст за цим посиланням.")
+    exit()

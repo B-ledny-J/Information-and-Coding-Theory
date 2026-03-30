@@ -1,6 +1,5 @@
 import re
 import math
-from itertools import count
 
 import requests # pip install requests
 from collections import Counter
@@ -32,7 +31,7 @@ def get_text_from_url(url):
         return None
 
 def get_base_unit():
-    print("\nОберіть тип даних (одиниць виміру):")
+    print("\nОберіть одиницю виміру:")
     print("1. Біти (основа 2)")
     print("2. Ніти (основа e)")
     print("3. Діти (основа 10)")
@@ -40,19 +39,20 @@ def get_base_unit():
 
     if choice == '2':
         base = math.e
-        unit = "нит"
+        unit = "ніт"
     elif choice == '3':
         base = 10
-        unit = "дит"
+        unit = "діт"
     else:
         base = 2
-        unit = "бит"
+        unit = "біт"
     return base, unit
 
 def process_statistics(text, base):
     entropy = 0
     n = len(text)
-    counts = len(Counter(text))
+    counts = Counter(text)
+    unique_count = len(counts)
     stats_list = []
     sorted_items = sorted(counts.items(), key=lambda item: item[1], reverse=True)
 
@@ -63,18 +63,18 @@ def process_statistics(text, base):
             stats_list.append((repr(char), count, p))
 
     info_amount = n * entropy
-    return n, counts, entropy, info_amount, stats_list
+    return n, unique_count, entropy, info_amount, stats_list
 
 def display_report(n, unique_count, entropy, info_amount, unit, stats_list):
     print("\n" + "-" * 40)
-    print(f"{'Символ':<10} | {'Кількість':<10} | {'Вірогідність':<12}")
+    print(f"{'Символ':<10} | {'Кількість':<10} | {'Частота':<12}")
     print("-" * 40)
     for char, count, p in stats_list:
         print(f"{char:<10} | {count:<10} | {p:<12.4f}")
 
     print("-" * 40)
     print(f"Довжина тексту: {n}")
-    print(f"Унікальних символів: {unique_count}")
+    print(f"Кількість унікальних символів у тексті: {unique_count}")
     print(f"Ентропія: {entropy:.4f} {unit}/символ")
     print(f"Кількість інформації: {info_amount:.4f} {unit}")
 
@@ -85,7 +85,7 @@ if text:
     base, unit = get_base_unit()
     n, counts, entropy, info_amount, top_10 = process_statistics(text, base)
     print(f"\nТекст успішно отримано!")
-    display_report(n, count, entropy, info_amount, unit, top_10)
+    display_report(n, counts, entropy, info_amount, unit, top_10)
 else:
     print("Не вдалося обробити текст за цим посиланням.")
     exit()

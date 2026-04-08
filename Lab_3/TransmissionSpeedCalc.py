@@ -22,13 +22,13 @@ h_uniform = math.log2(k)
 h_shannon = -sum(p * math.log2(p) for p in probs if p > 0)
 
 # Швидкість передачі для рівноймовірних символів
-C_equal = h_uniform / avg_tau_equal
+R_equal = h_uniform / avg_tau_equal
 
 # Швидкість передачі для геом. прогр.
-C_geom = h_shannon / avg_tau_geom
+R_geom = h_shannon / avg_tau_geom
 
 print(f"--- Результати Частини 1.2 ---")
 print(f"Ентропія Хартлі (Рівноймовірні символи): {h_uniform:.4f} біт/символ")
-print(f"Швидкість передачі для рівноймовірних символів (C): {C_equal:.4f} біт/с")
+print(f"Швидкість передачі для рівноймовірних символів (R): {R_equal:.4f} біт/с")
 print(f"Ентропія Шеннона (Геометрична прогресія): {h_shannon:.4f} біт/символ")
-print(f"Швидкість передачі для геометричної прогресії (C): {C_geom:.4f} біт/с")
+print(f"Швидкість передачі для геометричної прогресії (R): {R_geom:.4f} біт/с")
